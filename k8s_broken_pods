@@ -1,0 +1,15 @@
+#!/bin/bash
+
+NAMESPACES_FILE=~/.kube/team_namespaces
+
+if [[ ! -f $NAMESPACES_FILE ]]; then
+    echo 'No namespace file given. Create a file ${NAMESPACES_FILE} that contains all namespaces to use.'
+    exit 1
+fi
+
+for namespace in $(cat ${NAMESPACES_FILE}); do
+    kubectl get pods --field-selector status.phase=Failed -n ${namespace}
+    if [[ "$1" == "--fix" ]]; then
+        kubectl delete pods --field-selector status.phase=Failed -n ${namespace}
+    fi
+done
